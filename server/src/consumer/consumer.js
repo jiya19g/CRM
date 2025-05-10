@@ -1,10 +1,11 @@
 const client = require('../config/redisConfig');
 
-// Subscribe to the 'customerQueue' channel
 const consumeMessage = async () => {
   try {
     await client.subscribe('customerChannel', (message) => {
-      console.log('Received message from channel:', message);
+      const customer = JSON.parse(message);
+      console.log('Received customer from Redis:', customer);
+      // You can also write to MongoDB, log, etc.
     });
   } catch (err) {
     console.log('Error subscribing to Redis channel:', err);
