@@ -150,6 +150,15 @@ The application will be available at:
    - Campaign delivery mechanism is not implemented
    - Focus is on segment creation and campaign message management
 
+## Screenshots
+
+Here are some screenshots of the CRM Campaign Platform in action:
+![Login Page](./screenshots/login.png)
+![Segment Builder](./screenshots/segment-builder.png)
+![Campaign Form](./screenshots/campaign-form.png)
+![Campaign Form](./screenshots/campaign-form1.png)
+![Campaign History](./screenshots/dashboard.png)
+
 ## Contributing
 
 1. Fork the repository
