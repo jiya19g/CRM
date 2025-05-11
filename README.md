@@ -50,7 +50,7 @@ REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/jiya19g/CRM.git
 cd CRM-platform
 ```
 
