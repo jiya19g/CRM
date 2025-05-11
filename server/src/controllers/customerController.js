@@ -33,10 +33,18 @@ const addCustomer = async (req, res) => {
   }
 };
 
-// ✅ Filter customers based on rules
-const filterCustomers = async (req, res) => {
+const filterCustomers = async (req) => {
   const { rules, operator } = req.body;
-  if (!rules || rules.length === 0) return res.status(400).json({ error: 'No rules provided' });
+
+  if (!rules || rules.length === 0) {
+    throw new Error('No rules provided');
+  }
+
+  if (rules.length > 1 && !operator) {
+    throw new Error('Operator is required when using multiple rules');
+  }
+
+  const currentOperator = operator || 'and'; // Default to 'and' if operator is not provided
 
   try {
     const ruleQueries = rules.map(rule => {
@@ -62,15 +70,21 @@ const filterCustomers = async (req, res) => {
       }
     });
 
-    const query = operator === 'or' ? { $or: ruleQueries } : { $and: ruleQueries };
-
+    const query = currentOperator === 'or' ? { $or: ruleQueries } : { $and: ruleQueries };
     const filteredCustomers = await Customer.find(query);
-    res.status(200).json(filteredCustomers);
+
+    if (!filteredCustomers || filteredCustomers.length === 0) {
+      throw new Error('No customers found matching the criteria');
+    }
+
+    return filteredCustomers; // Return the filtered customers directly
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error filtering customers', message: err.message });
+    throw new Error('Error filtering customers');
   }
 };
+
+
 
 
 module.exports = { addCustomer, filterCustomers };

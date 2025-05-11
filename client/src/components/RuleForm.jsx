@@ -16,6 +16,7 @@ const RuleForm = ({ onSubmit }) => {
   const [operator, setOperator] = useState('and');
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [audienceSize, setAudienceSize] = useState(0); // For preview audience size
 
   const handleAddRule = () => {
     if (!value) return;
@@ -40,22 +41,37 @@ const RuleForm = ({ onSubmit }) => {
   };
 
   const handleApplyRules = async () => {
-    if (rules.length === 0) return;
+  if (rules.length === 0) return;
 
-    setIsLoading(true);
-    try {
-      const res = await axios.post('http://localhost:5000/api/customers/filter', {
-        rules,
-        operator
-      });
-      setFilteredCustomers(res.data);
-      onSubmit({ rules, operator });
-    } catch (err) {
-      console.error('Error filtering customers:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+  try {
+    // First filter customers
+    const filterRes = await axios.post('http://localhost:5000/api/segments/filter', {
+      rules,
+      operator
+    });
+    
+    setFilteredCustomers(filterRes.data);
+    setAudienceSize(filterRes.data.length);
+
+    // Then save the segment
+    const saveRes = await axios.post('http://localhost:5000/api/segments', {
+      name: `Segment ${new Date().toLocaleString()}`,
+      rules,
+      operator,
+      customers: filterRes.data.map(c => c._id)
+    });
+
+    onSubmit({ rules, operator });
+  } catch (err) {
+    console.error('Error:', err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
 
   return (
     <div className="space-y-6">
@@ -162,6 +178,9 @@ const RuleForm = ({ onSubmit }) => {
       {filteredCustomers.length > 0 && (
         <div className="mt-8 border-t pt-4">
           <h3 className="text-lg font-semibold mb-2">Filtered Customers ({filteredCustomers.length})</h3>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">Audience Size: {audienceSize} customers match the current rules.</p>
+          </div>
           <table className="min-w-full border text-sm">
             <thead className="bg-gray-100 text-gray-800">
               <tr>

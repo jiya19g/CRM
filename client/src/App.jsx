@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import RuleForm from './components/RuleForm';
+import SegmentHistory from './components/SegmentHistory';
 
 const App = () => {
   const [activeRules, setActiveRules] = useState([]);
@@ -14,7 +16,10 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 px-6 py-8">
       <h1 className="text-2xl font-bold text-indigo-800 mb-6">🎯 CRM Campaign Dashboard</h1>
 
-      <RuleForm onSubmit={handleFilterSubmit} />
+      <Routes>
+        <Route path="/" element={<RuleForm onSubmit={handleFilterSubmit} />} />
+        <Route path="/segments" element={<SegmentHistory />} />
+      </Routes>
 
       {activeRules.length > 0 && (
         <div className="mt-10 bg-white shadow-md rounded-lg p-5 border border-gray-200">
