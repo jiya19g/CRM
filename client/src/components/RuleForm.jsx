@@ -1,37 +1,55 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const ruleOptions = [
+  { value: 'visitsLessThan', label: 'Visits Less Than' },
+  { value: 'spendLessThan', label: 'Spend Less Than' },
+  { value: 'ageGreaterThan', label: 'Age Greater Than' },
+  { value: 'lastVisitBefore', label: 'Last Visit Before' },
+  { value: 'customerType', label: 'Customer Type' },
+];
+
 const RuleForm = ({ onSubmit }) => {
-  const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [rules, setRules] = useState([]);
   const [ruleType, setRuleType] = useState('visitsLessThan');
   const [value, setValue] = useState('');
+  const [operator, setOperator] = useState('and');
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const ruleOptions = [
-    { value: 'visitsLessThan', label: 'Visits Less Than' },
-    { value: 'spendLessThan', label: 'Spend Less Than' },
-    { value: 'ageGreaterThan', label: 'Age Greater Than' },
-    { value: 'lastVisitBefore', label: 'Last Visit Before' },
-    { value: 'customerType', label: 'Customer Type' },
-  ];
-
-  const handleRuleSubmit = async () => {
+  const handleAddRule = () => {
     if (!value) return;
-    
-    setIsLoading(true);
+
     const newRule = {
       ruleType,
-      value: ruleType.includes('age') ? parseInt(value) : 
-            ruleType.includes('Visit') ? new Date(value).toISOString() :
-            value
+      value: ruleType.includes('age') || ruleType.includes('spend') || ruleType.includes('visits')
+        ? parseInt(value)
+        : ruleType === 'lastVisitBefore'
+        ? new Date(value).toISOString()
+        : value
     };
 
+    setRules([...rules, newRule]);
+    setValue('');
+  };
+
+  const handleRemoveRule = (index) => {
+    const updatedRules = [...rules];
+    updatedRules.splice(index, 1);
+    setRules(updatedRules);
+  };
+
+  const handleApplyRules = async () => {
+    if (rules.length === 0) return;
+
+    setIsLoading(true);
     try {
       const res = await axios.post('http://localhost:5000/api/customers/filter', {
-        rules: [newRule]
+        rules,
+        operator
       });
       setFilteredCustomers(res.data);
-      onSubmit(newRule);
+      onSubmit({ rules, operator });
     } catch (err) {
       console.error('Error filtering customers:', err);
     } finally {
@@ -40,120 +58,132 @@ const RuleForm = ({ onSubmit }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-3">Create Customer Segment</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="ruleType" className="block text-sm font-medium text-gray-700">
-              Filter By
-            </label>
-            <select
-              id="ruleType"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              value={ruleType}
-              onChange={(e) => {
-                setRuleType(e.target.value);
-                setValue('');
-              }}
-            >
-              {ruleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-indigo-700">Create Customer Segment</h2>
 
-          <div>
-            <label htmlFor="value" className="block text-sm font-medium text-gray-700">
-              Value
-            </label>
-            {ruleType === 'lastVisitBefore' ? (
-              <input
-                type="date"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-              />
-            ) : ruleType === 'customerType' ? (
-              <select
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-              >
-                <option value="">Select type</option>
-                <option value="vip">VIP</option>
-                <option value="regular">Regular</option>
-                <option value="new">New</option>
-              </select>
-            ) : (
-              <input
-                type={ruleType.includes('age') || ruleType.includes('spend') || ruleType.includes('visits') ? "number" : "text"}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={`Enter ${ruleType.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-              />
-            )}
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label className="text-sm font-medium text-gray-700">Filter By</label>
+          <select
+            className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2"
+            value={ruleType}
+            onChange={(e) => {
+              setRuleType(e.target.value);
+              setValue('');
+            }}
+          >
+            {ruleOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-700">Value</label>
+          {ruleType === 'lastVisitBefore' ? (
+            <input
+              type="date"
+              className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          ) : ruleType === 'customerType' ? (
+            <select
+              className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            >
+              <option value="">Select Type</option>
+              <option value="vip">VIP</option>
+              <option value="regular">Regular</option>
+              <option value="new">New</option>
+            </select>
+          ) : (
+            <input
+              type="number"
+              className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          )}
+        </div>
+
+        <div className="flex items-end">
+          <button
+            type="button"
+            onClick={handleAddRule}
+            disabled={!value}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700"
+          >
+            + Add Rule
+          </button>
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center space-x-4 mt-2">
+        <span className="text-sm font-medium text-gray-700">Combine Rules Using:</span>
+        <label className="inline-flex items-center">
+          <input type="radio" name="operator" value="and" checked={operator === 'and'} onChange={(e) => setOperator(e.target.value)} className="mr-2" />
+          AND
+        </label>
+        <label className="inline-flex items-center">
+          <input type="radio" name="operator" value="or" checked={operator === 'or'} onChange={(e) => setOperator(e.target.value)} className="mr-2" />
+          OR
+        </label>
         <button
-          type="button"
-          onClick={handleRuleSubmit}
-          disabled={!value || isLoading}
-          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${!value || isLoading ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'}`}
+          onClick={handleApplyRules}
+          disabled={rules.length === 0 || isLoading}
+          className="ml-auto bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-green-700"
         >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Applying...
-            </>
-          ) : 'Apply Filter'}
+          {isLoading ? 'Filtering...' : 'Apply Filters'}
         </button>
       </div>
 
+      {rules.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold text-gray-800 mb-2">Active Rules</h3>
+          <div className="flex flex-wrap gap-2">
+            {rules.map((r, i) => (
+              <div key={i} className="flex items-center bg-gray-200 text-sm px-3 py-1 rounded-full">
+                <span className="mr-2">{r.ruleType}: {r.value}</span>
+                <button
+                  className="text-red-500 hover:text-red-700 font-bold"
+                  onClick={() => handleRemoveRule(i)}
+                  title="Remove rule"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {filteredCustomers.length > 0 && (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-6">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Filtered Customers ({filteredCustomers.length})
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spend</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+        <div className="mt-8 border-t pt-4">
+          <h3 className="text-lg font-semibold mb-2">Filtered Customers ({filteredCustomers.length})</h3>
+          <table className="min-w-full border text-sm">
+            <thead className="bg-gray-100 text-gray-800">
+              <tr>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Email</th>
+                <th className="px-4 py-2 text-left">Total Spend</th>
+                <th className="px-4 py-2 text-left">Age</th>
+                <th className="px-4 py-2 text-left">Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCustomers.map((c) => (
+                <tr key={c._id} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-2">{c.name}</td>
+                  <td className="px-4 py-2">{c.email}</td>
+                  <td className="px-4 py-2">₹{c.totalSpend.toLocaleString()}</td>
+                  <td className="px-4 py-2">{c.age}</td>
+                  <td className="px-4 py-2 capitalize">{c.customerType}</td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCustomers.map((customer) => (
-                  <tr key={customer._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{customer.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{customer.totalSpend.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{customer.age}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${customer.customerType === 'vip' ? 'bg-purple-100 text-purple-800' : customer.customerType === 'regular' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
-                        {customer.customerType}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

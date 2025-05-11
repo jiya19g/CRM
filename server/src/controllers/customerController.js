@@ -35,42 +35,34 @@ const addCustomer = async (req, res) => {
 
 // ✅ Filter customers based on rules
 const filterCustomers = async (req, res) => {
-  const { rules } = req.body;
+  const { rules, operator } = req.body;
   if (!rules || rules.length === 0) return res.status(400).json({ error: 'No rules provided' });
 
   try {
-    let query = {};
-
-    rules.forEach(rule => {
+    const ruleQueries = rules.map(rule => {
       switch (rule.ruleType) {
         case 'spendLessThan':
-          query.totalSpend = { $lt: rule.value };
-          break;
+          return { totalSpend: { $lt: rule.value } };
         case 'visitsLessThan':
-          query.visits = { $lt: rule.value };
-          break;
+          return { visits: { $lt: rule.value } };
         case 'visitsGreaterThan':
-          query.visits = { $gt: rule.value };
-          break;
+          return { visits: { $gt: rule.value } };
         case 'lastVisitBefore':
-          query.lastVisit = { $lt: new Date(rule.value) };
-          break;
+          return { lastVisit: { $lt: new Date(rule.value) } };
         case 'ageGreaterThan':
-          query.age = { $gt: rule.value };
-          break;
+          return { age: { $gt: rule.value } };
         case 'ageLessThan':
-          query.age = { $lt: rule.value };
-          break;
+          return { age: { $lt: rule.value } };
         case 'customerType':
-          query.customerType = rule.value;
-          break;
+          return { customerType: rule.value };
         case 'gender':
-          query.gender = rule.value;
-          break;
+          return { gender: rule.value };
         default:
-          break;
+          return {};
       }
     });
+
+    const query = operator === 'or' ? { $or: ruleQueries } : { $and: ruleQueries };
 
     const filteredCustomers = await Customer.find(query);
     res.status(200).json(filteredCustomers);
@@ -79,5 +71,6 @@ const filterCustomers = async (req, res) => {
     res.status(500).json({ error: 'Error filtering customers', message: err.message });
   }
 };
+
 
 module.exports = { addCustomer, filterCustomers };
