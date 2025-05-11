@@ -109,6 +109,33 @@ const CampaignForm = () => {
       >
         {loading ? 'Launching...' : 'Launch Campaign'}
       </button>
+      {customers.length > 0 && (
+  <div className="mt-8">
+    <h3 className="text-lg font-semibold mb-2">Targeted Customers ({customers.length})</h3>
+    <div className="overflow-x-auto max-h-64 border rounded shadow-inner bg-white">
+      <table className="min-w-full text-sm">
+        <thead className="bg-gray-100 sticky top-0">
+          <tr>
+            <th className="px-4 py-2 text-left">Name</th>
+            <th className="px-4 py-2 text-left">Email</th>
+            <th className="px-4 py-2 text-left">Type</th>
+            <th className="px-4 py-2 text-left">Total Spend</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customers.map((c) => (
+            <tr key={c._id} className="border-t hover:bg-indigo-50">
+              <td className="px-4 py-2">{c.name}</td>
+              <td className="px-4 py-2">{c.email}</td>
+              <td className="px-4 py-2 capitalize">{c.customerType}</td>
+              <td className="px-4 py-2">₹{c.totalSpend?.toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
     </div>
   );
 };
