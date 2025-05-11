@@ -15,28 +15,73 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
-      <h1 className="text-2xl font-bold text-indigo-800 mb-6">🎯 CRM Campaign Dashboard</h1>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb',
+      padding: '32px 24px'
+    }}>
+      <h1 style={{
+        fontSize: '24px',
+        fontWeight: '700',
+        color: '#3730a3',
+        marginBottom: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>CRM Campaign Dashboard</h1>
 
       <Routes>
         <Route path="/" element={<RuleForm onSubmit={handleFilterSubmit} />} />
         <Route path="/segments" element={<SegmentHistory />} />
         <Route path="/campaigns/new" element={<CampaignForm />} />
-    <Route path="/campaigns" element={<CampaignHistory />} />
+        <Route path="/campaigns" element={<CampaignHistory />} />
       </Routes>
 
       {activeRules.length > 0 && (
-        <div className="mt-10 bg-white shadow-md rounded-lg p-5 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">🔎 Active Filters</h3>
-          <p className="text-sm text-gray-600 mb-2">
-            <span className="font-medium">Combined Using:</span>{' '}
-            <span className="uppercase text-indigo-600 font-semibold">{activeOperator}</span>
+        <div style={{
+          marginTop: '40px',
+          backgroundColor: 'white',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          borderRadius: '12px',
+          padding: '20px',
+          border: '1px solid #e5e7eb'
+        }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1f2937',
+            marginBottom: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>🔎 Active Filters</h3>
+          <p style={{
+            fontSize: '14px',
+            color: '#4b5563',
+            marginBottom: '8px'
+          }}>
+            <span style={{ fontWeight: '500' }}>Combined Using:</span>{' '}
+            <span style={{
+              textTransform: 'uppercase',
+              color: '#4f46e5',
+              fontWeight: '600'
+            }}>{activeOperator}</span>
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px'
+          }}>
             {activeRules.map((rule, index) => (
               <span
                 key={index}
-                className="bg-indigo-100 text-indigo-800 text-sm px-3 py-1 rounded-full"
+                style={{
+                  backgroundColor: '#e0e7ff',
+                  color: '#3730a3',
+                  fontSize: '14px',
+                  padding: '4px 12px',
+                  borderRadius: '9999px'
+                }}
               >
                 {rule.ruleType}: {rule.value}
               </span>
