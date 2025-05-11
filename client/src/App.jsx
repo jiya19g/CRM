@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import RuleForm from './components/RuleForm';
 import SegmentHistory from './components/SegmentHistory';
+import CampaignForm from './components/CampaignForm';
+import CampaignHistory from './components/CampaignHistory';
 
 const App = () => {
   const [activeRules, setActiveRules] = useState([]);
@@ -19,6 +21,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<RuleForm onSubmit={handleFilterSubmit} />} />
         <Route path="/segments" element={<SegmentHistory />} />
+        <Route path="/campaigns/new" element={<CampaignForm />} />
+    <Route path="/campaigns" element={<CampaignHistory />} />
       </Routes>
 
       {activeRules.length > 0 && (

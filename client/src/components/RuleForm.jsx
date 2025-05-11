@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ruleOptions = [
   { value: 'visitsLessThan', label: 'Visits Less Than' },
@@ -16,7 +17,8 @@ const RuleForm = ({ onSubmit }) => {
   const [operator, setOperator] = useState('and');
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [audienceSize, setAudienceSize] = useState(0); // For preview audience size
+  const [audienceSize, setAudienceSize] = useState(0);
+  const navigate = useNavigate(); 
 
   const handleAddRule = () => {
     if (!value) return;
@@ -50,7 +52,7 @@ const RuleForm = ({ onSubmit }) => {
       rules,
       operator
     });
-    
+
     setFilteredCustomers(filterRes.data);
     setAudienceSize(filterRes.data.length);
 
@@ -63,6 +65,14 @@ const RuleForm = ({ onSubmit }) => {
     });
 
     onSubmit({ rules, operator });
+
+    // Move navigation here, where saveRes and filterRes are defined
+    navigate('/campaigns/new', {
+      state: {
+        segment: saveRes.data,
+        customers: filterRes.data
+      }
+    });
   } catch (err) {
     console.error('Error:', err);
   } finally {
