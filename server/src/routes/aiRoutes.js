@@ -14,8 +14,8 @@ router.post('/suggest-messages', async (req, res) => {
 Write 3 short, friendly, and personalized SMS messages for a marketing campaign with this objective: "${objective}".
 Each message should sound like a real offer from a business to a customer, and should encourage the customer to take action.
 Include a sense of urgency or a call to action if appropriate.
-Return them as a numbered list.
-IMPORTANT: Use ONLY "{name}" (with curly braces) as the placeholder for the customer's name. Do NOT use [User Name], [name], [UserName], or any other format.`;
+Do NOT use the customer's name or any placeholder for the name in the messages.
+Return them as a numbered list.`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
@@ -27,13 +27,14 @@ IMPORTANT: Use ONLY "{name}" (with curly braces) as the placeholder for the cust
   .map(line =>
     line
       // Replace all possible name placeholders with {name}
-      .replace(/\[User Name\]|\[UserName\]|\[name\]|User Name|UserName|name|<name>|\(name\)/gi, '{name}')
+      .replace(/\{\{name\}\}|\[User Name\]|\[UserName\]|\[name\]|\[Name\]|User Name|UserName|name|<name>|\(name\)/gi, '{name}')
       // Replace all possible brand placeholders with your brand
-      .replace(/\[Your Brand\]|\[Your Company Name\]/gi, 'The Cookie Shop')
-      // Replace all possible link placeholders with your link
-      .replace(/\[Your Website Link\]|\[Link to Website\]|\[Link\]/gi, 'https://thecookieshop.com')
+      .replace(/\[Your Brand\]|\[Your Company Name\]|\[Brand Name\]/gi, 'The Cookie Shop')
+      // Replace all possible link placeholders with your link (case-insensitive, covers [Link to website])
+      .replace(/\[Your Website Link\]|\[Link to Website\]|\[Link to website\]|\[Link\]|\[Website\/App Link\]/gi, 'https://thecookieshop.com')
   )
   .filter(Boolean);
+
 
     res.json({ suggestions });
   } catch (err) {
