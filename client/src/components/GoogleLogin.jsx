@@ -3,10 +3,16 @@ import { GoogleLogin } from '@react-oauth/google';
 
 const GoogleAuth = ({ onSuccess }) => {
   return (
-    <GoogleLogin
-      onSuccess={(response) => onSuccess(response)}
-      onError={() => console.log('Login Failed')}
-    />
+    <div className="flex justify-center">
+      <GoogleLogin
+        onSuccess={onSuccess}
+        onError={() => console.log('Login Failed')}
+        shape="pill"
+        theme="filled_blue"
+        size="large"
+        text="signin_with"
+      />
+    </div>
   );
 };
 
