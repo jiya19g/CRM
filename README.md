@@ -153,10 +153,14 @@ The application will be available at:
 ## Screenshots
 
 Here are some screenshots of the CRM Campaign Platform in action:
+### Login Page
 ![Login Page](./screenshots/login.png)
+### Segment Builder
 ![Segment Builder](./screenshots/segment-builder.png)
+### Campaign Form
 ![Campaign Form](./screenshots/campaign-form.png)
-![Campaign Form](./screenshots/campaign-form1.png)
+![Campaign Form](./screenshots/campaign-form-1.png)
+### Dashboard
 ![Campaign History](./screenshots/dashboard.png)
 
 ## Contributing
