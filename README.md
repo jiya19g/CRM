@@ -26,8 +26,9 @@ graph TD
 ### Prerequisites
 - Node.js (v14 or higher)
 - MongoDB
-- Redis
+- Docker (for Redis)
 - Google Cloud Platform account (for OAuth and AI)
+- Postman (for API testing and data population)
 
 ### Environment Variables
 
@@ -66,7 +67,12 @@ cd ../client
 npm install
 ```
 
-4. Start the development servers:
+4. Start Redis using Docker:
+```bash
+docker run --name redis-crm -p 6379:6379 -d redis
+```
+
+5. Start the development servers:
 
 In the server directory:
 ```bash
@@ -102,7 +108,7 @@ The application will be available at:
 - Create React App
 - PostCSS
 - Autoprefixer
-- Jest for testing
+- Postman for API testing and data population
 
 ## Features
 
@@ -136,10 +142,16 @@ The application will be available at:
    - Redis pub/sub is used for real-time updates but requires Redis server to be running
    - WebSocket implementation might be needed for production-scale real-time features
 
+4. **Feature Completeness**
+   - Many features are in basic/minimal implementation stage
+   - Core functionality is implemented but needs enhancement
+   - UI/UX improvements needed for better user experience
+
 ## Assumptions
 
 1. **Customer Data**
-   - Customer data is assumed to be pre-populated in the database
+   - Data is populated through API calls using Postman
+   - No UI needed for data population
    - Basic customer attributes (name, email, spend, visits) are required
 
 2. **Authentication**
@@ -149,6 +161,10 @@ The application will be available at:
 3. **Campaign Delivery**
    - Campaign delivery mechanism is not implemented
    - Focus is on segment creation and campaign message management
+
+4. **API Testing**
+   - Postman is used for API testing and validation
+   - API endpoints are regularly tested using Postman collections
 
 ## Screenshots
 
